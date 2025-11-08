@@ -14,12 +14,7 @@ on:
         type: string
   push:
     branches:
-      - '!release-branch'
-      - master
-      - 1.*
-      - develop
-      - MOSIP*
-      - release*
+      - mec-1.2.0.1
 
 jobs:
   build-maven-print:
