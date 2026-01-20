@@ -46,8 +46,8 @@ public class NotificationUtil {
     @Value("${mosip.utc-datetime-pattern}")
     private String dateTimeFormat;
 
-    private static final String EMAIL_SUB_DEFAULT = "UIN Card Attached!";
-    private static final String EMAIL_DEFAULT = "Your UIN Card is attached.";
+    private static final String EMAIL_SUB_DEFAULT = "UID Card Attached!";
+    private static final String EMAIL_DEFAULT = "Your UID Card is attached.";
 
     public List<NotificationResponseDTO> emailNotification(List<String> emailIds, String fileName, String emailContentTpl, String emailSubTpl, Map<String, Object> attributes,
                                                     byte[] attachmentFile, String templateLang) throws Exception {
