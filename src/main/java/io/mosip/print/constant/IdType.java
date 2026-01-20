@@ -5,5 +5,5 @@ package io.mosip.print.constant;
  *
  */
 public enum IdType {
-	UIN, RID,VID;
+	UID,UIN, RID,VID;
 }
