@@ -14,7 +14,7 @@ on:
         type: string
   push:
     branches:
-      - mec-1.2.0.1
+      - myanmar
 
 jobs:
   build-maven-print:
