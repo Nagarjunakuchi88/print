@@ -347,7 +347,7 @@ public class PrintServiceImpl implements PrintService {
 
             setTemplateAttributes(decryptedJson.toString(), attributes);
             attributes.put(IdType.UIN.toString(), uin);
-			attributes.put(IdType.UIN.toString(), uid);
+			attributes.put(IdType.UID.toString(), uid);
             attributes.put(IdType.RID.toString(), registrationId);
 
             String prefLangAttr = (String) attributes.get(userPreferredLanguageAttribute);
