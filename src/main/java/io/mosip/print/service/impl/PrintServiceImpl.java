@@ -343,11 +343,12 @@ public class PrintServiceImpl implements PrintService {
                 attributes.put("isPhotoSet", isPhotoSet);
             }
             uin = decryptedJson.getString("UIN");
-			String uid = decryptedJson.getString("UID");
+			printLogger.info("Decrypted Credential JSON:\n{}", decryptedJson.toString(2));
+			// String uid = decryptedJson.getString("UID");
 
             setTemplateAttributes(decryptedJson.toString(), attributes);
             attributes.put(IdType.UIN.toString(), uin);
-			attributes.put(IdType.UID.toString(), uid);
+			// attributes.put(IdType.UID.toString(), uid);
             attributes.put(IdType.RID.toString(), registrationId);
 
             String prefLangAttr = (String) attributes.get(userPreferredLanguageAttribute);
