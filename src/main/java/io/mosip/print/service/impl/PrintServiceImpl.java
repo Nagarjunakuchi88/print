@@ -343,6 +343,8 @@ public class PrintServiceImpl implements PrintService {
                 attributes.put("isPhotoSet", isPhotoSet);
             }
             uin = decryptedJson.getString("UIN");
+			printLogger.info("FULL CREDENTIAL:\n{}", credential);
+            printLogger.info("CREDENTIAL SUBJECT JSON:\n{}", credentialSubjectJson.toString(2));
 			printLogger.info("Decrypted Credential JSON:\n{}", decryptedJson.toString(2));
 			// String uid = decryptedJson.getString("UID");
 
