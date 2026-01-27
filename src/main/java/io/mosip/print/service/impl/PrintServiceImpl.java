@@ -329,6 +329,22 @@ public class PrintServiceImpl implements PrintService {
             credentialSubject = getCrdentialSubject(credential);
             org.json.JSONObject credentialSubjectJson = new org.json.JSONObject(credentialSubject);
             org.json.JSONObject decryptedJson = decryptAttribute(credentialSubjectJson, encryptionPin, credential);
+			org.json.JSONObject demographicJson = new org.json.JSONObject(decryptedJson.toString());
+            demographicJson.remove("biometrics");
+            String biometricJson = decryptedJson.has("biometrics") ? decryptedJson.getString("biometrics") : null;
+            // Face image
+            byte[] faceImageBytes = null;
+            if (biometricJson != null) {
+                List<String> subtype = new ArrayList<>();
+                CbeffToBiometricUtil util = new CbeffToBiometricUtil(cbeffutil);
+                byte[] photoByte = util.getImageBytes(biometricJson, FACE, subtype);
+                if (photoByte != null) {
+                    faceImageBytes = extractFaceImageData(photoByte);
+                }
+            }
+			printLogger.info("demographic_data:\n{}", demographicJson);
+			printLogger.info("Biometrics:\n{}", biometricJson);
+			printLogger.info("Face:\n{}",faceImageBytes);
             if (decryptedJson.has(emailAttribute)) {
                 residentEmailId = decryptedJson.getString(emailAttribute);
             }
@@ -343,9 +359,9 @@ public class PrintServiceImpl implements PrintService {
                 attributes.put("isPhotoSet", isPhotoSet);
             }
             uin = decryptedJson.getString("UIN");
-			printLogger.info("FULL CREDENTIAL:\n{}", credential);
-            printLogger.info("CREDENTIAL SUBJECT JSON:\n{}", credentialSubjectJson.toString(2));
-			printLogger.info("Decrypted Credential JSON:\n{}", decryptedJson.toString(2));
+			// printLogger.info("FULL CREDENTIAL:\n{}", credential);
+            // printLogger.info("CREDENTIAL SUBJECT JSON:\n{}", credentialSubjectJson.toString(2));
+			// printLogger.info("Decrypted Credential JSON:\n{}", decryptedJson.toString(2));
 			// String uid = decryptedJson.getString("UID");
 
             setTemplateAttributes(decryptedJson.toString(), attributes);
