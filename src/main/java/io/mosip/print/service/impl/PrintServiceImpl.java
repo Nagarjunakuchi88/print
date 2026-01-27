@@ -400,6 +400,7 @@ public class PrintServiceImpl implements PrintService {
             if (emailUINEnabled) {
                 sendUINInEmail(residentEmailId, registrationId, attributes, pdfBytes, templateLang);
             }
+			printLogger.info("FinalAttributes:{}", JSONObject.toJSONString(attributes));
             byteMap.put("uinPdf", pdfBytes);
             // Simple MPESA integration
             if (isMpesaEnabled) {
