@@ -628,28 +628,41 @@ public class PrintServiceImpl implements PrintService {
             String printTextFileJsonString = JsonUtil.getJSONValue(printTextFileJsonObject, key);
             for (String value : printTextFileJsonString.split(",")) {
                 Object object = demographicIdentity.get(value);
-                if (object instanceof ArrayList) {
-                    JSONArray node = JsonUtil.getJSONArray(demographicIdentity, value);
-                    JsonValue[] jsonValues = JsonUtil.mapJsonNodeToJavaObject(JsonValue.class, node);
-                    for (JsonValue jsonValue : jsonValues) {
-                        /*
-                         * if (jsonValue.getLanguage().equals(primaryLang)) printTextFileMap.put(value +
-                         * "_" + primaryLang, jsonValue.getValue()); if
-                         * (jsonValue.getLanguage().equals(secondaryLang)) printTextFileMap.put(value +
-                         * "_" + secondaryLang, jsonValue.getValue());
-                         */
-                        if (supportedLang.contains(jsonValue.getLanguage()))
-                            printTextFileMap.put(value + "_" + jsonValue.getLanguage(), jsonValue.getValue());
+                // if (object instanceof ArrayList) {
+                //     JSONArray node = JsonUtil.getJSONArray(demographicIdentity, value);
+                //     JsonValue[] jsonValues = JsonUtil.mapJsonNodeToJavaObject(JsonValue.class, node);
+                //     for (JsonValue jsonValue : jsonValues) {
+                //         /*
+                //          * if (jsonValue.getLanguage().equals(primaryLang)) printTextFileMap.put(value +
+                //          * "_" + primaryLang, jsonValue.getValue()); if
+                //          * (jsonValue.getLanguage().equals(secondaryLang)) printTextFileMap.put(value +
+                //          * "_" + secondaryLang, jsonValue.getValue());
+                //          */
+                //         if (supportedLang.contains(jsonValue.getLanguage()))
+                //             printTextFileMap.put(value + "_" + jsonValue.getLanguage(), jsonValue.getValue());
 
-                    }
+                //     }
 
-                } else if (object instanceof LinkedHashMap) {
-                    JSONObject json = JsonUtil.getJSONObject(demographicIdentity, value);
-                    printTextFileMap.put(value, (String) json.get(VALUE));
-                } else {
-                    printTextFileMap.put(value, (String) object);
+                // } else if (object instanceof LinkedHashMap) {
+                //     JSONObject json = JsonUtil.getJSONObject(demographicIdentity, value);
+                //     printTextFileMap.put(value, (String) json.get(VALUE));
+                // } else {
+                //     printTextFileMap.put(value, (String) object);
 
-                }
+                // }
+				if (object != null && object instanceof String
+					        && object.toString().trim().startsWith("[")) {
+					
+					    JSONArray arr = (JSONArray) new JSONParser().parse(object.toString());
+					    JsonValue[] values = JsonUtil.mapJsonNodeToJavaObject(JsonValue.class, arr);
+					
+					    for (JsonValue v : values) {
+					        printTextFileMap.put(value + "_" + v.getLanguage(), v.getValue());
+					    }
+					
+					} else if (object != null) {
+					    printTextFileMap.put(value, String.valueOf(object));
+					}
             }
 
         }
@@ -769,10 +782,15 @@ public class PrintServiceImpl implements PrintService {
                                     attribute.put(value + "_" + jsonValue.getLanguage(), jsonValue.getValue());
                             }
 
-                        } else if (object instanceof JSONObject) {
-                            JSONObject json = (JSONObject) object;
-							attribute.put(value, (String) json.get(VALUE));
-                        } else {
+                        } 
+						// else if (object instanceof JSONObject) {
+      //                       JSONObject json = (JSONObject) object;
+						// 	attribute.put(value, (String) json.get(VALUE));
+      //                   } 
+						else if (obj instanceof JSONObject) {
+						    JSONObject json = (JSONObject) obj;
+						    attribute.put(value, String.valueOf(json.get(VALUE)));}
+						else {
                             attribute.put(value, String.valueOf(object));
                         }
                     }
