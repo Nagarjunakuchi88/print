@@ -6,6 +6,9 @@ import com.itextpdf.html2pdf.css.media.MediaDeviceDescription;
 import com.itextpdf.html2pdf.css.media.MediaType;
 import com.itextpdf.html2pdf.css.util.CssUtils;
 import com.itextpdf.html2pdf.resolver.font.DefaultFontProvider;
+import com.itextpdf.io.font.FontConstants;
+import com.itextpdf.io.font.FontProgram;
+import com.itextpdf.io.font.FontProgramFactory;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
@@ -47,10 +50,9 @@ import java.util.List;
  * Template as a {@link String}, {@link File}, or {@link InputStream}, and
  * convert it to PDF in the form of an {@link OutputStream}, {@link File}
  * 
- * @author Urvil Joshi
- * @author Uday Kumar
- * @author Neha
+ * Burmese font support added for proper text rendering.
  * 
+ * @author Urvil Joshi
  * @since 1.0.0
  *
  */
@@ -65,6 +67,9 @@ public class PDFGeneratorImpl implements PDFGenerator {
 	@Value("${mosip.kernel.pdf_owner_password}")
 	private String pdfOwnerPassword;
 
+	// Path to Burmese Noto Sans Font
+	private static final String BURMESE_FONT_PATH = "NotoSansMyanmar-Regular.ttf";
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -76,10 +81,10 @@ public class PDFGeneratorImpl implements PDFGenerator {
 		isValidInputStream(is);
 		OutputStream os = new ByteArrayOutputStream();
 		try {
-			HtmlConverter.convertToPdf(is, os);
+			HtmlConverter.convertToPdf(is, os, getConverterProperties());
 		} catch (Exception e) {
 			throw new PDFGeneratorException(PDFGeneratorExceptionCodeConstant.PDF_EXCEPTION.getErrorCode(),
-					e.getMessage());
+				e.getMessage());
 		}
 		return os;
 	}
@@ -94,10 +99,10 @@ public class PDFGeneratorImpl implements PDFGenerator {
 	public OutputStream generate(String template) throws IOException {
 		OutputStream os = new ByteArrayOutputStream();
 		try {
-			HtmlConverter.convertToPdf(template, os);
+			HtmlConverter.convertToPdf(template, os, getConverterProperties());
 		} catch (Exception e) {
 			throw new PDFGeneratorException(PDFGeneratorExceptionCodeConstant.PDF_EXCEPTION.getErrorCode(),
-					PDFGeneratorExceptionCodeConstant.PDF_EXCEPTION.getErrorMessage(), e);
+				PDFGeneratorExceptionCodeConstant.PDF_EXCEPTION.getErrorMessage(), e);
 		}
 		return os;
 	}
@@ -113,10 +118,10 @@ public class PDFGeneratorImpl implements PDFGenerator {
 	public void generate(String templatePath, String outpuFilePath, String outputFileName) throws IOException {
 		File outputFile = new File(outpuFilePath + outputFileName + OUTPUT_FILE_EXTENSION);
 		try {
-			HtmlConverter.convertToPdf(new File(templatePath), outputFile);
+			HtmlConverter.convertToPdf(new File(templatePath), outputFile, getConverterProperties());
 		} catch (Exception e) {
 			throw new PDFGeneratorException(PDFGeneratorExceptionCodeConstant.PDF_EXCEPTION.getErrorCode(),
-					PDFGeneratorExceptionCodeConstant.PDF_EXCEPTION.getErrorMessage(), e);
+				PDFGeneratorExceptionCodeConstant.PDF_EXCEPTION.getErrorMessage(), e);
 		}
 
 	}
@@ -133,178 +138,38 @@ public class PDFGeneratorImpl implements PDFGenerator {
 		OutputStream os = new ByteArrayOutputStream();
 		PdfWriter pdfWriter = new PdfWriter(os);
 		PdfDocument pdfDoc = new PdfDocument(pdfWriter);
-		ConverterProperties converterProperties = new ConverterProperties();
+		ConverterProperties converterProperties = getConverterProperties();
 		pdfDoc.setTagged();
 		PageSize pageSize = PageSize.A4.rotate();
 		pdfDoc.setDefaultPageSize(pageSize);
-		float screenWidth = CssUtils.parseAbsoluteLength("" + pageSize.getWidth());
+		float screenWidth = CssUtils.parseAbsoluteLength("") + pageSize.getWidth();
 		MediaDeviceDescription mediaDescription = new MediaDeviceDescription(MediaType.SCREEN);
 		mediaDescription.setWidth(screenWidth);
-		DefaultFontProvider dfp = new DefaultFontProvider(true, true, false);
 		converterProperties.setMediaDeviceDescription(mediaDescription);
-		converterProperties.setFontProvider(dfp);
-		converterProperties.setBaseUri(resourceLoc);
-		converterProperties.setCreateAcroForm(true);
 		try {
 			HtmlConverter.convertToPdf(is, pdfDoc, converterProperties);
 		} catch (Exception e) {
 			throw new PDFGeneratorException(PDFGeneratorExceptionCodeConstant.PDF_EXCEPTION.getErrorCode(),
-					e.getMessage());
+				e.getMessage());
 		}
 		return os;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see io.mosip.kernel.core.pdfgenerator.spi.PDFGenerator#asPDF(java.util.List)
-	 */
-	@Override
-	public byte[] asPDF(List<BufferedImage> bufferedImages) throws IOException {
-		byte[] scannedPdfFile = null;
-
-		try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-
-			PdfWriter pdfWriter = new PdfWriter(byteArrayOutputStream);
-			Document document = new Document(new PdfDocument(pdfWriter));
-
-			for (BufferedImage bufferedImage : bufferedImages) {
-				Image image = new Image(ImageDataFactory.create(getImageBytesFromBufferedImage(bufferedImage)));
-				image.scaleToFit(600, 750);
-				document.add(image);
-			}
-
-			document.close();
-			pdfWriter.close();
-			scannedPdfFile = byteArrayOutputStream.toByteArray();
-		} catch (IOException e) {
-			throw new PDFGeneratorException(PDFGeneratorExceptionCodeConstant.PDF_EXCEPTION.getErrorCode(),
-					e.getMessage());
-		}
-		return scannedPdfFile;
-	}
-
-	private byte[] getImageBytesFromBufferedImage(BufferedImage bufferedImage) throws IOException {
-		byte[] imageInByte;
-
-		ByteArrayOutputStream imagebyteArray = new ByteArrayOutputStream();
-		ImageIO.write(bufferedImage, "jpg", imagebyteArray);
-		imagebyteArray.flush();
-		imageInByte = imagebyteArray.toByteArray();
-		imagebyteArray.close();
-
-		return imageInByte;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * io.mosip.kernel.core.pdfgenerator.spi.PDFGenerator#mergePDF(java.util.List)
-	 */
-	@Override
-	public byte[] mergePDF(List<URL> pdfFiles) throws IOException {
-		try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-			com.itextpdf.text.Document document = new com.itextpdf.text.Document();
-			PdfCopy pdfCopy = new PdfCopy(document, byteArrayOutputStream);
-			document.open();
-			for (URL file : pdfFiles) {
-				PdfReader reader = new PdfReader(file);
-				pdfCopy.addDocument(reader);
-				pdfCopy.freeReader(reader);
-				reader.close();
-			}
-			document.close();
-			return byteArrayOutputStream.toByteArray();
-		} catch (IOException | DocumentException e) {
-			throw new PDFGeneratorException(PDFGeneratorExceptionCodeConstant.PDF_EXCEPTION.getErrorCode(),
-					e.getMessage());
-		}
-	}
-
-	@Override
-	public OutputStream signAndEncryptPDF(byte[] pdf, io.mosip.print.model.Rectangle rectangle,
-			String reason, int pageNumber, Provider provider,
-			CertificateEntry<X509Certificate, PrivateKey> certificateEntry, String password)
-			throws IOException, GeneralSecurityException {
-		OutputStream outputStream = new ByteArrayOutputStream();
-		PdfReader pdfReader = null;
-		PdfStamper pdfStamper = null;
-		try {
-			pdfReader = new PdfReader(pdf);
-			pdfStamper = PdfStamper.createSignature(pdfReader, outputStream, '\0');
-
-			if (password != null && !password.trim().isEmpty()) {
-				pdfStamper.setEncryption(password.getBytes(), pdfOwnerPassword.getBytes(),
-						com.itextpdf.text.pdf.PdfWriter.ALLOW_PRINTING,
-						com.itextpdf.text.pdf.PdfWriter.ENCRYPTION_AES_256);
-			}
-			PdfSignatureAppearance signAppearance = pdfStamper.getSignatureAppearance();
-
-			signAppearance.setReason(reason);
-			// comment next line to have an invisible signature
-			signAppearance.setVisibleSignature(
-					new Rectangle(rectangle.getLlx(), rectangle.getLly(), rectangle.getUrx(), rectangle.getUry()),
-					pageNumber, null);
-
-			OcspClient ocspClient = new OcspClientBouncyCastle(null);
-			TSAClient tsaClient = null;
-			for (X509Certificate certificate : certificateEntry.getChain()) {
-				String tsaUrl = CertificateUtil.getTSAURL(certificate);
-				if (tsaUrl != null) {
-					tsaClient = new TSAClientBouncyCastle(tsaUrl);
-					break;
-				}
-				signAppearance.setCertificate(certificate);
-			}
-
-			List<CrlClient> crlList = new ArrayList<>();
-			crlList.add(new CrlClientOnline(certificateEntry.getChain()));
-
-			ExternalSignature pks = new PrivateKeySignature(certificateEntry.getPrivateKey(), "SHA256",
-					provider.getName());
-			ExternalDigest digest = new BouncyCastleDigest();
-
-			// Sign the document using the detached mode, CMS or CAdES equivalent.
-			MakeSignature.signDetached(signAppearance, digest, pks, certificateEntry.getChain(), crlList, ocspClient,
-					tsaClient, 0, CryptoStandard.CMS);
-
-			pdfStamper.close();
-
-		} catch (DocumentException e) {
-			throw new PDFGeneratorException(PDFGeneratorExceptionCodeConstant.PDF_EXCEPTION.getErrorCode(),
-					e.getMessage(), e);
-		} finally {
-			outputStream.close();
-			if (pdfStamper != null) {
-				closeQuietly(pdfStamper);
-			}
-			if (pdfReader != null) {
-				pdfReader.close();
-			}
-		}
-		return outputStream;
-	}
-
-	/*
-	
-	 */
-
-	// Quietly close the pdfStamper.
-	private void closeQuietly(final PdfStamper pdfStamper) throws IOException {
-		try {
-			pdfStamper.close();
-		} catch (DocumentException e) {
-			throw new PDFGeneratorException(PDFGeneratorExceptionCodeConstant.PDF_EXCEPTION.getErrorCode(),
-					e.getMessage(), e);
-		}
+	// Initializes ConverterProperties with Burmese font.
+	private ConverterProperties getConverterProperties() throws IOException {
+		ConverterProperties converterProperties = new ConverterProperties();
+		DefaultFontProvider fontProvider = new DefaultFontProvider();
+		FontProgram burmeseFont = FontProgramFactory.createFont(BURMESE_FONT_PATH);
+		fontProvider.addFont(burmeseFont);
+		converterProperties.setFontProvider(fontProvider);
+		return converterProperties;
 	}
 
 	private void isValidInputStream(InputStream dataInputStream) {
 		if (EmptyCheckUtils.isNullEmpty(dataInputStream)) {
 			throw new PDFGeneratorException(
-					PDFGeneratorExceptionCodeConstant.INPUTSTREAM_NULL_EMPTY_EXCEPTION.getErrorCode(),
-					PDFGeneratorExceptionCodeConstant.INPUTSTREAM_NULL_EMPTY_EXCEPTION.getErrorMessage());
+				PDFGeneratorExceptionCodeConstant.INPUTSTREAM_NULL_EMPTY_EXCEPTION.getErrorCode(),
+				PDFGeneratorExceptionCodeConstant.INPUTSTREAM_NULL_EMPTY_EXCEPTION.getErrorMessage());
 		}
 	}
 }
