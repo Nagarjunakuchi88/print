@@ -402,6 +402,7 @@ public class PrintServiceImpl implements PrintService {
                     printLogger.debug(PlatformErrorMessages.PRT_PRT_QRCODE_NOT_SET.name());
                 }
                 printLogger.info("Attributes:{}", JSONObject.toJSONString(attributes));
+				printLogger.info("Template Attributes Keys: {}", attributes.keySet());
                 // getting template and placing original valuespng
                 InputStream uinArtifact = templateGenerator.getTemplate(template, attributes, templateLang);
                 if (uinArtifact == null) {
@@ -425,7 +426,6 @@ public class PrintServiceImpl implements PrintService {
             String datashareUrl = getDatashareUrl(pdfBytes);
             printStatusUpdate(requestId, CredentialStatusConstant.PRINTED.name(), datashareUrl);
             isTransactionSuccessful = true;
-			printLogger.info("Template Attributes Keys: {}", attribute.keySet());
         } catch (QrcodeGenerationException e) {
             description.setMessage(PlatformErrorMessages.PRT_PRT_QR_CODE_GENERATION_ERROR.getMessage());
             description.setCode(PlatformErrorMessages.PRT_PRT_QR_CODE_GENERATION_ERROR.getCode());
