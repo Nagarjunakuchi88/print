@@ -874,8 +874,12 @@ public class PrintServiceImpl implements PrintService {
 
         String parameter = null;
         if (jsonValues != null) {
+			printLogger.info("Template Attributes Keys: {}", attribute.keySet());
             for (int count = 0; count < jsonValues.length; count++) {
                 String lang = jsonValues[count].getLanguage();
+				if ("mya".equalsIgnoreCase(lang) || "my".equalsIgnoreCase(lang)) {
+				    lang = "bur";
+				}
                 if (langCode.contains(lang)) {
                     parameter = jsonValues[count].getValue();
                     break;
