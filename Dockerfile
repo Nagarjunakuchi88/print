@@ -77,8 +77,8 @@ VOLUME ${work_dir}/logs ${work_dir}/Glowroot
 
 COPY ./target/print-*.jar print.jar
 
-# Copy the SVG flag from resources into container
-COPY src/main/resources/Flag_of_Myanmar.svg /app/resources/Flag_of_Myanmar.svg
+# Copy the PNG flag from resources into container
+COPY src/main/resources/flag.png /app/resources/flag.png
 
 # change permissions of file inside working dir
 RUN chown -R ${container_user}:${container_user} /home/${container_user}
