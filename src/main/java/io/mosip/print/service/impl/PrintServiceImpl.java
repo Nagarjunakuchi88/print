@@ -425,6 +425,7 @@ public class PrintServiceImpl implements PrintService {
             String datashareUrl = getDatashareUrl(pdfBytes);
             printStatusUpdate(requestId, CredentialStatusConstant.PRINTED.name(), datashareUrl);
             isTransactionSuccessful = true;
+			printLogger.info("Template Attributes Keys: {}", attribute.keySet());
         } catch (QrcodeGenerationException e) {
             description.setMessage(PlatformErrorMessages.PRT_PRT_QR_CODE_GENERATION_ERROR.getMessage());
             description.setCode(PlatformErrorMessages.PRT_PRT_QR_CODE_GENERATION_ERROR.getCode());
@@ -874,7 +875,6 @@ public class PrintServiceImpl implements PrintService {
 
         String parameter = null;
         if (jsonValues != null) {
-			printLogger.info("Template Attributes Keys: {}", attribute.keySet());
             for (int count = 0; count < jsonValues.length; count++) {
                 String lang = jsonValues[count].getLanguage();
 				if ("mya".equalsIgnoreCase(lang) || "my".equalsIgnoreCase(lang)) {
