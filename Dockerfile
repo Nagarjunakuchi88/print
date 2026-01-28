@@ -81,8 +81,8 @@ COPY ./target/print-*.jar print.jar
 COPY src/main/resources/flag.png /app/resources/flag.png
 
 RUN mkdir -p /home/mosip/fonts
-COPY src/main/resources/Padauk.ttf /home/mosip/fonts/
-RUN chmod 644 /home/mosip/fonts/Padauk.ttf
+COPY src/main/resources/NotoSansMyanmar-Regular.ttf /home/mosip/fonts/
+RUN chmod 644 /home/mosip/fonts/NotoSansMyanmar-Regular.ttf
 
 # change permissions of file inside working dir
 RUN chown -R ${container_user}:${container_user} /home/${container_user}
