@@ -80,6 +80,10 @@ COPY ./target/print-*.jar print.jar
 # Copy the PNG flag from resources into container
 COPY src/main/resources/flag.png /app/resources/flag.png
 
+RUN mkdir -p /home/mosip/fonts
+COPY src/main/resources/Padauk.ttf /home/mosip/fonts/
+RUN chmod 644 /home/mosip/fonts/Padauk.ttf
+
 # change permissions of file inside working dir
 RUN chown -R ${container_user}:${container_user} /home/${container_user}
 
