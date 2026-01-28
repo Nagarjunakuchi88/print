@@ -629,49 +629,29 @@ public class PrintServiceImpl implements PrintService {
             String printTextFileJsonString = JsonUtil.getJSONValue(printTextFileJsonObject, key);
             for (String value : printTextFileJsonString.split(",")) {
                 Object object = demographicIdentity.get(value);
-                // if (object instanceof ArrayList) {
-                //     JSONArray node = JsonUtil.getJSONArray(demographicIdentity, value);
-                //     JsonValue[] jsonValues = JsonUtil.mapJsonNodeToJavaObject(JsonValue.class, node);
-                //     for (JsonValue jsonValue : jsonValues) {
-                //         /*
-                //          * if (jsonValue.getLanguage().equals(primaryLang)) printTextFileMap.put(value +
-                //          * "_" + primaryLang, jsonValue.getValue()); if
-                //          * (jsonValue.getLanguage().equals(secondaryLang)) printTextFileMap.put(value +
-                //          * "_" + secondaryLang, jsonValue.getValue());
-                //          */
-                //         if (supportedLang.contains(jsonValue.getLanguage()))
-                //             printTextFileMap.put(value + "_" + jsonValue.getLanguage(), jsonValue.getValue());
+                if (object instanceof ArrayList) {
+                    JSONArray node = JsonUtil.getJSONArray(demographicIdentity, value);
+                    JsonValue[] jsonValues = JsonUtil.mapJsonNodeToJavaObject(JsonValue.class, node);
+                    for (JsonValue jsonValue : jsonValues) {
+                        /*
+                         * if (jsonValue.getLanguage().equals(primaryLang)) printTextFileMap.put(value +
+                         * "_" + primaryLang, jsonValue.getValue()); if
+                         * (jsonValue.getLanguage().equals(secondaryLang)) printTextFileMap.put(value +
+                         * "_" + secondaryLang, jsonValue.getValue());
+                         */
+                        if (supportedLang.contains(jsonValue.getLanguage()))
+                            printTextFileMap.put(value + "_" + jsonValue.getLanguage(), jsonValue.getValue());
 
-                //     }
+                    }
 
-                // } else if (object instanceof LinkedHashMap) {
-                //     JSONObject json = JsonUtil.getJSONObject(demographicIdentity, value);
-                //     printTextFileMap.put(value, (String) json.get(VALUE));
-                // } else {
-                //     printTextFileMap.put(value, (String) object);
+                } else if (object instanceof LinkedHashMap) {
+                    JSONObject json = JsonUtil.getJSONObject(demographicIdentity, value);
+                    printTextFileMap.put(value, (String) json.get(VALUE));
+                } else {
+                    printTextFileMap.put(value, (String) object);
 
-                // }
-				if (object != null && object instanceof String
-				        && object.toString().trim().startsWith("[")) {
+                }
 				
-				    try {
-				        JSONArray arr = (JSONArray) new JSONParser().parse(object.toString());
-				        JsonValue[] values =
-				                JsonUtil.mapJsonNodeToJavaObject(JsonValue.class, arr);
-				
-				        for (JsonValue v : values) {
-				            printTextFileMap.put(value + "_" + v.getLanguage(), v.getValue());
-				        }
-				
-				    } catch (org.json.simple.parser.ParseException e) {
-				        // If parsing fails, fallback to raw value
-				        printTextFileMap.put(value, object.toString());
-				    }
-				
-				} else if (object != null) {
-				    printTextFileMap.put(value, String.valueOf(object));
-				}
-
             }
 
         }
