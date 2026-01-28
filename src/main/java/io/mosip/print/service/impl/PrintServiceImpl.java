@@ -653,11 +653,18 @@ public class PrintServiceImpl implements PrintService {
 				if (object != null && object instanceof String
 				        && object.toString().trim().startsWith("[")) {
 				
-				    JSONArray arr = (JSONArray) new JSONParser().parse(object.toString());
-				    JsonValue[] values = JsonUtil.mapJsonNodeToJavaObject(JsonValue.class, arr);
+				    try {
+				        JSONArray arr = (JSONArray) new JSONParser().parse(object.toString());
+				        JsonValue[] values =
+				                JsonUtil.mapJsonNodeToJavaObject(JsonValue.class, arr);
 				
-				    for (JsonValue v : values) {
-				        printTextFileMap.put(value + "_" + v.getLanguage(), v.getValue());
+				        for (JsonValue v : values) {
+				            printTextFileMap.put(value + "_" + v.getLanguage(), v.getValue());
+				        }
+				
+				    } catch (org.json.simple.parser.ParseException e) {
+				        // If parsing fails, fallback to raw value
+				        printTextFileMap.put(value, object.toString());
 				    }
 				
 				} else if (object != null) {
