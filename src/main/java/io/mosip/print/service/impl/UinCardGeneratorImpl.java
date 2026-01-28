@@ -67,7 +67,7 @@ public class UinCardGeneratorImpl implements UinCardGenerator<byte[]> {
 	@Value("${mosip.print.service.uincard.signature.reason}")
 	private String reason;
 
-	@Value("${mosip.print.service.uincard.signature.required:true}")
+	@Value("${mosip.print.service.uincard.signature.required:false}")
 	private boolean isSignatureRequired;
 
 	@Autowired
