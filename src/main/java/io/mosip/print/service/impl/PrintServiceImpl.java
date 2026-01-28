@@ -783,13 +783,10 @@ public class PrintServiceImpl implements PrintService {
                             }
 
                         } 
-						// else if (object instanceof JSONObject) {
-      //                       JSONObject json = (JSONObject) object;
-						// 	attribute.put(value, (String) json.get(VALUE));
-      //                   } 
-						else if (obj instanceof JSONObject) {
-						    JSONObject json = (JSONObject) obj;
-						    attribute.put(value, String.valueOf(json.get(VALUE)));}
+						else if (object instanceof JSONObject) {
+                            JSONObject json = (JSONObject) object;
+							attribute.put(value, (String) json.get(VALUE));
+                        } 
 						else {
                             attribute.put(value, String.valueOf(object));
                         }
